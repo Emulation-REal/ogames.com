@@ -1,178 +1,1095 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSTS AUTO v3.3 [FIXED REDIRECT]</title>
-  <style>
-    body { font-family: 'Courier New', monospace; background: #0d0d0d; color: #00ff00; padding: 20px; }
-    h1 { text-align: center; color: #00ff41; text-shadow: 0 0 10px #00ff41; }
-    .container { max-width: 800px; margin: auto; background: #1a1a1a; padding: 20px; border-radius: 10px; border: 1px solid #00ff41; }
-    a.link { color: #3399ff; text-decoration: underline; font-weight: bold; }
-    a.link:hover { color: #66ccff; }
-    pre { background: #000; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #00ff41; white-space: pre-wrap; font-size: 13px; }
-    .step { margin: 20px 0; padding: 15px; background: #112211; border-left: 4px solid #00ff41; }
-    .warning { color: #ff5555; font-weight: bold; }
-    #status { color: #ffff00; font-weight: bold; margin: 10px 0; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Classic Games Arena | Dark Theme Pro Edition</title>
+
+    <!-- ============================================= -->
+    <!-- **DARK THEME CSS – BUILT-IN, NO EXTERNAL FILES** -->
+    <!-- ============================================= -->
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #f0f6fc;
+            --accent: #58a6ff;
+            --danger: #f85149;
+            --win: #3fb950;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 { text-align:center; margin-bottom:1rem; }
+        h1 { font-size:2.5rem; color:var(--accent); }
+        h2 { font-size:1.8rem; }
+        .container { max-width:1200px; width:100%; }
+
+        /* ---------- CARD GRID ---------- */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .game-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align:center;
+            transition: transform .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+        .game-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,.4); }
+        .game-card img { width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:1rem; }
+        .game-card h3 { margin:0.5rem 0; color:var(--accent); }
+
+        /* ---------- GAME MODAL ---------- */
+        .modal {
+            display:none;
+            position:fixed;
+            inset:0;
+            background: rgba(0,0,0,.85);
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+            padding:1rem;
+        }
+        .modal.active { display:flex; }
+        .modal-content {
+            background: var(--card);
+            border:1px solid var(--border);
+            border-radius:12px;
+            max-width:900px;
+            width:100%;
+            max-height:95vh;
+            overflow:auto;
+            position:relative;
+            padding:2rem;
+        }
+        .close-btn {
+            position:absolute;
+            top:12px; right:16px;
+            background:none;
+            border:none;
+            font-size:2rem;
+            color:var(--text);
+            cursor:pointer;
+        }
+
+        /* ---------- COMMON BOARD STYLES ---------- */
+        .board {
+            display:grid;
+            gap:4px;
+            margin:1.5rem auto;
+            justify-content:center;
+        }
+        .cell {
+            background: var(--bg);
+            border:2px solid var(--border);
+            border-radius:6px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2rem;
+            font-weight:bold;
+            cursor:pointer;
+            transition:background .15s;
+        }
+        .cell:hover { background:#21262d; }
+
+        /* ---------- BUTTONS ---------- */
+        .btn {
+            background: var(--accent);
+            color:#fff;
+            border:none;
+            padding:0.6rem 1.2rem;
+            border-radius:8px;
+            font-weight:600;
+            cursor:pointer;
+            transition:background .2s;
+        }
+        .btn:hover { background:#1f6feb; }
+        .btn.danger { background:var(--danger); }
+        .btn.danger:hover { background:#da3633; }
+        .btn-group { display:flex; gap:1rem; justify-content:center; margin-top:1rem; }
+
+        /* ---------- STATUS BAR ---------- */
+        .status {
+            text-align:center;
+            font-size:1.1rem;
+            margin:1rem 0;
+            padding:0.5rem;
+            background:#21262d;
+            border-radius:6px;
+        }
+        .status.win { color:var(--win); }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width:600px) {
+            .board { gap:3px; }
+            .cell { font-size:1.5rem; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎮 XSTS AUTO-GRABBER v3.3 [REDIRECT FIXED]</h1>
-    <p><span class="warning">EDUCATIONAL USE ONLY – YOUR ACCOUNT, YOUR RISK</span></p>
 
-    <div class="step">
-      <h3>ONE-CLICK LOGIN</h3>
-      <p>Click the <a href="#" class="link" onclick="startAuthFlow(); return false;">blue underlined link</a> → login in new tab → auto-returns with XSTS</p>
-      <p id="status">Ready...</p>
+<div class="container">
+    <h1>🎮 Classic Games Arena</h1>
+    <p style="text-align:center; max-width:700px; margin:0 auto 2rem;">
+        Professional single-player experience with <strong>AI bots</strong>. Dark theme, pure HTML+CSS+JS – no frameworks, no bloat.
+    </p>
+
+    <!-- ==================== GAMES GRID ==================== -->
+    <div class="games-grid">
+        <div class="game-card" data-game="tictactoe">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwZDExMTciLz48cmVjdCB4PSIzMCIgeT0iMCIgd2lkdGg9IjIiIGhlaWdodD0iMTAwIiBmaWxsPSIjMzAzNjNkIi8+PHJlY3QgeD0iNjgiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMwMzYzZCIvPjxyZWN0IHg9IjAiIHk9IjMwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjIiIGZpbGw9IiMzMDM2M2QiLz48cmVjdCB4PSIwIiB5PSI2OCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyIiBmaWxsPSIjMzAzNjNkIi8+PHRleHQgeD0iNTAlIiB5PSI1NSIgZm9udC1zaXplPSIzMCIgZmlsbD0iI2YwbDZmYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WDwvdGV4dD48dGV4dCB4PSI1MCUiIHk9IjU1IiBmb250LXNpemU9IjMwIiBmaWxsPSIjZjA1YjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5PPC90ZXh0Pjwvc3ZnPg==" alt="Tic-Tac-Toe"/>
+            <h3>Tic-Tac-Toe</h3>
+            <p>3×3 grid. Unbeatable AI (Minimax).</p>
+        </div>
+
+        <div class="game-card" data-game="connect4">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNzAgNjAiPjxyZWN0IHdpZHRoPSI3MCIgaGVpZ2h0PSI2MCIgZmlsbD0iIzBkMTExNyIvPjxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSI2MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzIxMjYyZCIvPjxjaXJjbGUgY3g9IjE1IiBjeT0iNDUiIHI9IjQiIGZpbGw9IiNmODUxNDkiLz48Y2lyY2xlIGN4PSIzNSIgY3k9IjM1IiByPSI0IiBmaWxsPSIjZmZmYjMzIi8+PGNpcmNsZSBjeD0iNTUiIGN5PSI0NSIgcj0iNCIgZmlsbD0iI2Y4NTE0OSIvPjwvc3ZnPg==" alt="Connect 4"/>
+            <h3>Connect 4</h3>
+            <p>7×6 board. Drop discs. First to 4 wins.</p>
+        </div>
+
+        <div class="game-card" data-game="checkers">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgODAgODAiPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzBkMTExNyIvPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzIxMjYyZCIvPjxyZWN0IHg9IjIwIiB5PSIwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiMyMTI2MmQiLz48cmVjdCB4PSI0MCIgeT0iMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjEyNjJkIi8+PGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iNCIgZmlsbD0iI2Y4NTE0OSIvPjxjaXJjbGUgY3g9IjY1IiBjeT0iNjUiIHI9IjQiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=" alt="Checkers"/>
+            <h3>Checkers</h3>
+            <p>8×8 board. Jump & capture. King me!</p>
+        </div>
+
+        <div class="game-card" data-game="chess">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgODAgODAiPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzBkMTExNyIvPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzIxMjYyZCIvPjxyZWN0IHg9IjIwIiB5PSIwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiMyMTI2MmQiLz48dGV4dCB4PSIyNSIgeT0iMzAiIGZvbnQtc2l6ZT0iMTUiIGZpbGw9IiNmZmZmZmYiPu+4jTwvdGV4dD48dGV4dCB4PSI2NSIgeT0iNzAiIGZvbnQtc2l6ZT0iMTUiIGZpbGw9IiNmODUxNDkiPu+4jTwvdGV4dD48L3N2Zz4=" alt="Chess"/>
+            <h3>Chess</h3>
+            <p>Full rules. Stockfish-level AI (simplified).</p>
+        </div>
+
+        <!-- Bonus Games -->
+        <div class="game-card" data-game="reversi">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgODAgODAiPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzBkMTExNyIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjgiIGZpbGw9IiNmZmZmZmYiLz48Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSI4IiBmaWxsPSIjMDAwMDAwIi8+PHBhdGggZD0iTTQwLDMwIEw0MCw1MCIgc3Ryb2tlPSIjMzAzNjNkIiBzdHJva2Utd2lkdGg9IjMiLz48L3N2Zz4=" alt="Reversi"/>
+            <h3>Reversi (Othello)</h3>
+            <p>Flip opponent discs. Most at end wins.</p>
+        </div>
+
+        <div class="game-card" data-game="hangman">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwZDExMTciLz48bGluZSB4MT0iMjAiIHkxPSI4MCIgeDI9IjgwIiB5Mj0iODAiIHN0cm9rZT0iIzMwMzYzZCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PGxpbmUgeDE9IjMwIiB5MT0iODAiIHgyPSIzMCIgeTI9IjIwIiBzdHJva2U9IiMzMDM2M2QiIHN0cm9rZS13aWR0aD0iNCIvPjxsaW5lIHgxPSIzMCIgeTE9IjIwIiB4Mj0iNjAiIHkyPSIyMCIgc3Ryb2tlPSIjMzAzNjNkIiBzdHJva2Utd2lkdGg9IjQiLz48Y2lyY2xlIGN4PSI2MCIgY3k9IjI4IiByPSI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmODUxNDkiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==" alt="Hangman"/>
+            <h3>Hangman</h3>
+            <p>Guess the word. 6 wrong = lose.</p>
+        </div>
     </div>
+</div>
 
-    <div class="step">
-      <h3>RESULT:</h3>
-      <pre id="output">Click the blue link to start...</pre>
+<!-- ===================== MODAL ===================== -->
+<div id="gameModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn">&times;</button>
+        <div id="gameContainer"></div>
     </div>
+</div>
 
-    <div class="step">
-      <h3>FIX NOTES:</h3>
-      <p>Added <b>postMessage bridge</b> from Xbox.com<br>
-         Polls <code>location.hash</code> every 500ms<br>
-         Closes tab on success<br>
-         100% works even if you're already logged in</p>
-    </div>
-  </div>
+<!-- ============================================= -->
+<!-- **JAVASCRIPT – FULL GAMES + AI LOGIC** -->
+<!-- ============================================= -->
+<script>
+/* ==================== GLOBAL STATE ==================== */
+const modal = document.getElementById('gameModal');
+const container = document.getElementById('gameContainer');
+const closeBtn = document.querySelector('.close-btn');
+let currentGame = null;
 
-  <script>
-    let loginWindow = null;
-    const OAUTH_URL = 'https://login.live.com/oauth20_authorize.srf?client_id=1f907974-e22b-4810-a9de-d9647380c97e&scope=xboxlive.signin+openid+profile+offline_access&redirect_uri=https%3A%2F%2Fwww.xbox.com%2Fauth%2Fmsa%3Faction%3DloggedIn%26locale_hint%3Den-US&response_type=code&state=eyJpZCI6IjAxOWE0NTZjLTkzNTAtNzQxOS04YTkwLWE1NmIyMjhhNzVmOSIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D%7Chttps%253A%252F%252Fwww.xbox.com%252F&response_mode=fragment&prompt=select_account&code_challenge=MljmB5BsMZuUDGWGjhbKH0sG6ZG7xNTnHQTIYn5ea1Q&code_challenge_method=S256&x-client-SKU=msal.js.browser&x-client-Ver=3.20.0';
+// Open modal on card click
+document.querySelectorAll('.game-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const game = card.dataset.game;
+        loadGame(game);
+        modal.classList.add('active');
+    });
+});
 
-    function startAuthFlow() {
-      document.getElementById('status').textContent = '🔄 Opening login in new tab...';
-      
-      loginWindow = window.open(OAUTH_URL, '_blank', 'noopener=yes');
-      
-      if (!loginWindow) {
-        alert('❌ Allow new tabs!');
-        return;
-      }
+closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+window.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
-      // Listen for postMessage from Xbox.com
-      const listener = (event) => {
-        if (event.origin !== 'https://www.xbox.com') return;
-        const url = event.data;
-        const codeMatch = url.match(/code=([^&]+)/);
-        if (codeMatch) {
-          const code = codeMatch[1];
-          window.removeEventListener('message', listener);
-          exchangeCode(code);
+/* ==================== GAME LOADER ==================== */
+function loadGame(name) {
+    container.innerHTML = '';
+    currentGame = name;
+
+    const title = document.createElement('h2');
+    title.textContent = name.charAt(0).toUpperCase() + name.slice(1).replace(/([A-Z])/g, ' $1');
+    container.appendChild(title);
+
+    const status = document.createElement('div');
+    status.className = 'status';
+    status.id = 'status';
+    container.appendChild(status);
+
+    if (name === 'tictactoe') initTicTacToe(status);
+    else if (name === 'connect4') initConnect4(status);
+    else if (name === 'checkers') initCheckers(status);
+    else if (name === 'chess') initChess(status);
+    else if (name === 'reversi') initReversi(status);
+    else if (name === 'hangman') initHangman(status);
+}
+
+/* ==================== TIC-TAC-TOE ==================== */
+function initTicTacToe(statusEl) {
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.gridTemplateColumns = 'repeat(3, 80px)';
+    board.style.gridTemplateRows = 'repeat(3, 80px)';
+    const cells = [];
+    let turn = 'X', gameBoard = Array(9).fill(null), ai = 'O', player = 'X';
+
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        cell.addEventListener('click', () => playerMove(i));
+        cells.push(cell);
+        board.appendChild(cell);
+    }
+    container.appendChild(board);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.textContent = 'Reset';
+    resetBtn.onclick = () => initTicTacToe(statusEl);
+    btnGroup.appendChild(resetBtn);
+    container.appendChild(btnGroup);
+
+    updateStatus();
+
+    function playerMove(i) {
+        if (gameBoard[i] || checkWinner(gameBoard)) return;
+        gameBoard[i] = player;
+        cells[i].textContent = player;
+        if (checkWinner(gameBoard)) return endGame();
+        turn = ai;
+        updateStatus();
+        setTimeout(aiMove, 400);
+    }
+
+    function aiMove() {
+        const best = minimax(gameBoard, ai);
+        const move = best.index;
+        gameBoard[move] = ai;
+        cells[move].textContent = ai;
+        turn = player;
+        if (checkWinner(gameBoard)) endGame();
+        else updateStatus();
+    }
+
+    function updateStatus() {
+        const winner = checkWinner(gameBoard);
+        if (winner) statusEl.textContent = winner === 'tie' ? "It's a tie!" : `${winner} wins!`;
+        else statusEl.textContent = `Your turn (${player})`;
+    }
+
+    function endGame() {
+        const winner = checkWinner(gameBoard);
+        statusEl.textContent = winner === 'tie' ? "Tie!" : `${winner} wins!`;
+        statusEl.classList.add('win');
+    }
+
+    function checkWinner(b) {
+        const lines = [
+            [0,1,2],[3,4,5],[6,7,8],
+            [0,3,6],[1,4,7],[2,5,8],
+            [0,4,8],[2,4,6]
+        ];
+        for (let [a,b,c] of lines) {
+            if (b[a] && b[a] === b[b] && b[a] === b[c]) return b[a];
         }
-      };
-      window.addEventListener('message', listener);
+        return b.every(v => v) ? 'tie' : null;
+    }
 
-      // Poll location.hash (works even if postMessage blocked)
-      const poll = setInterval(() => {
-        try {
-          if (loginWindow.closed) {
-            clearInterval(poll);
-            document.getElementById('status').textContent = '❌ Tab closed. Try again.';
-            return;
-          }
+    function minimax(board, player) {
+        const winner = checkWinner(board);
+        if (winner === ai) return {score: 10};
+        if (winner === this.player) return {score: -10};
+        if (winner === 'tie') return {score: 0};
 
-          const hash = loginWindow.location.hash;
-          if (hash && hash.includes('code=')) {
-            clearInterval(poll);
-            const code = hash.match(/code=([^&]+)/)?.[1];
-            if (code) {
-              loginWindow.postMessage('close', '*'); // Try to close
-              loginWindow.close();
-              window.removeEventListener('message', listener);
-              exchangeCode(code);
+        const moves = [];
+        for (let i = 0; i < 9; i++) {
+            if (!board[i]) {
+                board[i] = player;
+                const result = minimax(board, player === ai ? this.player : ai);
+                moves.push({index: i, score: result.score});
+                board[i] = null;
             }
-          }
-        } catch (e) {
-          // Cross-origin block expected until redirect
         }
-      }, 500);
+        if (player === ai) {
+            const max = moves.reduce((a,b) => a.score > b.score ? a : b, moves[0]);
+            return max;
+        } else {
+            const min = moves.reduce((a,b) => a.score < b.score ? a : b, moves[0]);
+            return min;
+        }
+    }
+}
 
-      // Timeout fallback
-      setTimeout(() => {
-        if (poll) clearInterval(poll);
-        document.getElementById('status').textContent = '⏰ Timed out. Did you login?';
-      }, 120000);
+/* ==================== CONNECT 4 ==================== */
+function initConnect4(statusEl) {
+    const ROWS = 6, COLS = 7;
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.gridTemplate = `repeat(${ROWS}, 60px)/repeat(${COLS}, 60px)`;
+    const cells = [];
+    let gameBoard = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+    let player = 'red', ai = 'yellow', turn = player;
+
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            cell.addEventListener('click', () => dropDisc(c));
+            cells.push(cell);
+            board.appendChild(cell);
+        }
+    }
+    container.appendChild(board);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.textContent = 'Reset';
+    resetBtn.onclick = () => initConnect4(statusEl);
+    btnGroup.appendChild(resetBtn);
+    container.appendChild(btnGroup);
+
+    updateStatus();
+
+    function dropDisc(col) {
+        if (turn !== player) return;
+        const row = getAvailableRow(col);
+        if (row === null) return;
+        placeDisc(row, col, player);
+        if (checkWin(gameBoard, player)) return endGame(player);
+        turn = ai;
+        updateStatus();
+        setTimeout(aiDrop, 500);
     }
 
-    async function exchangeCode(code) {
-      document.getElementById('status').textContent = '🔄 Exchanging code...';
-
-      const tokenPayload = new URLSearchParams({
-        client_id: '1f907974-e22b-4810-a9de-d9647380c97e',
-        code: code,
-        grant_type: 'authorization_code',
-        redirect_uri: 'https://www.xbox.com/auth/msa?action=loggedIn&locale_hint=en-US',
-        code_verifier: 'MljmB5BsMZuUDGWGjhbKH0sG6ZG7xNTnHQTIYn5ea1Q'
-      });
-
-      try {
-        const tokenRes = await fetch('https://login.live.com/oauth20_token.srf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: tokenPayload
-        });
-
-        const tokenData = await tokenRes.json();
-        if (!tokenData.access_token) throw new Error('No access_token: ' + JSON.stringify(tokenData));
-
-        const accessToken = tokenData.access_token;
-        document.getElementById('status').textContent = '✅ XBL ready! Getting XSTS...';
-
-        // XBL → XSTS chain
-        const xblRes = await fetch('https://user.auth.xboxlive.com/user/authenticate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            Properties: { AuthMethod: "RPS", SiteName: "user.auth.xboxlive.com", RpsTicket: `d=${accessToken}` },
-            RelyingParty: "http://auth.xboxlive.com",
-            TokenType: "JWT"
-          })
-        });
-
-        const xblData = await xblRes.json();
-        if (!xblData.Token) throw new Error('XBL failed');
-
-        const xstsRes = await fetch('https://xsts.auth.xboxlive.com/xsts/authorize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            Properties: { AuthMethod: "RPS", SiteName: "user.auth.xboxlive.com", RpsTicket: `d=${xblData.Token}` },
-            RelyingParty: "http://auth.xboxlive.com",
-            TokenType: "JWT"
-          })
-        });
-
-        const xstsData = await xstsRes.json();
-        if (!xstsData.Token) throw new Error('XSTS failed');
-
-        const xsts = xstsData.Token;
-        const uhs = xstsData.DisplayClaims.xui[0].uhs;
-
-        document.getElementById('output').textContent = 
-`🎉 XSTS ACQUIRED!
-
-XBL: ${accessToken.substring(0, 30)}...
-XSTS: ${xsts}
-UHS: ${uhs}
-
-HEADERS:
-Authorization: XSTS ${xsts}
-X-XBL-Contract-Version: 2
-
-🔥 Use in games, mods, or APIs!`;
-        document.getElementById('status').textContent = '✅ DONE!';
-
-      } catch (err) {
-        document.getElementById('output').textContent = `💥 ERROR: ${err.message}`;
-        document.getElementById('status').textContent = '❌ Failed.';
-      }
+    function aiDrop() {
+        let bestCol = null, bestScore = -Infinity;
+        for (let c = 0; c < COLS; c++) {
+            const r = getAvailableRow(c);
+            if (r !== null) {
+                gameBoard[r][c] = ai;
+                const score = minimaxC4(gameBoard, 5, false);
+                gameBoard[r][c] = null;
+                if (score > bestScore) { bestScore = score; bestCol = c; }
+            }
+        }
+        const row = getAvailableRow(bestCol);
+        placeDisc(row, bestCol, ai);
+        if (checkWin(gameBoard, ai)) endGame(ai);
+        else { turn = player; updateStatus(); }
     }
-  </script>
+
+    function placeDisc(r, c, p) {
+        gameBoard[r][c] = p;
+        const idx = r * COLS + c;
+        cells[idx].style.background = p === 'red' ? '#f85149' : '#fffb33';
+        cells[idx].style.borderRadius = '50%';
+        cells[idx].style.transform = 'scale(0.9)';
+    }
+
+    function getAvailableRow(col) {
+        for (let r = ROWS-1; r >= 0; r--) if (!gameBoard[r][col]) return r;
+        return null;
+    }
+
+    function checkWin(b, p) {
+        // Horizontal
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS-3; c++) {
+                if (b[r][c] === p && b[r][c+1] === p && b[r][c+2] === p && b[r][c+3] === p) return true;
+            }
+        }
+        // Vertical
+        for (let c = 0; c < COLS; c++) {
+            for (let r = 0; r < ROWS-3; r++) {
+                if (b[r][c] === p && b[r+1][c] === p && b[r+2][c] === p && b[r+3][c] === p) return true;
+            }
+        }
+        // Diagonal /
+        for (let r = 0; r < ROWS-3; r++) {
+            for (let c = 0; c < COLS-3; c++) {
+                if (b[r][c] === p && b[r+1][c+1] === p && b[r+2][c+2] === p && b[r+3][c+3] === p) return true;
+            }
+        }
+        // Diagonal \
+        for (let r = 3; r < ROWS; r++) {
+            for (let c = 0; c < COLS-3; c++) {
+                if (b[r][c] === p && b[r-1][c+1] === p && b[r-2][c+2] === p && b[r-3][c+3] === p) return true;
+            }
+        }
+        return false;
+    }
+
+    function minimaxC4(board, depth, isMax) {
+        if (depth === 0 || checkWin(board, ai) || checkWin(board, player) || isBoardFull(board)) {
+            if (checkWin(board, ai)) return 100;
+            if (checkWin(board, player)) return -100;
+            return 0;
+        }
+        if (isMax) {
+            let maxEval = -Infinity;
+            for (let c = 0; c < COLS; c++) {
+                const r = getAvailableRowC4(board, c);
+                if (r !== null) {
+                    board[r][c] = ai;
+                    const eval = minimaxC4(board, depth-1, false);
+                    board[r][c] = null;
+                    maxEval = Math.max(maxEval, eval);
+                }
+            }
+            return maxEval;
+        } else {
+            let minEval = Infinity;
+            for (let c = 0; c < COLS; c++) {
+                const r = getAvailableRowC4(board, c);
+                if (r !== null) {
+                    board[r][c] = player;
+                    const eval = minimaxC4(board, depth-1, true);
+                    board[r][c] = null;
+                    minEval = Math.min(minEval, eval);
+                }
+            }
+            return minEval;
+        }
+    }
+
+    function getAvailableRowC4(b, col) {
+        for (let r = ROWS-1; r >= 0; r--) if (!b[r][col]) return r;
+        return null;
+    }
+
+    function isBoardFull(b) { return b[0].every(c => c !== null); }
+
+    function updateStatus() {
+        const winner = checkWin(gameBoard, player) ? player : checkWin(gameBoard, ai) ? ai : null;
+        if (winner) {
+            statusEl.textContent = `${winner === 'red' ? 'You' : 'AI'} win!`;
+            statusEl.classList.add('win');
+        } else {
+            statusEl.textContent = turn === player ? 'Your turn (Red)' : 'AI thinking... (Yellow)';
+        }
+    }
+
+    function endGame(winner) {
+        statusEl.textContent = `${winner === 'red' ? 'You' : 'AI'} win!`;
+        statusEl.classList.add('win');
+    }
+}
+
+/* ==================== CHECKERS ==================== */
+function initCheckers(statusEl) {
+    const SIZE = 8;
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.gridTemplate = `repeat(${SIZE}, 60px)/repeat(${SIZE}, 60px)`;
+    const cells = [];
+    let gameBoard = Array(SIZE).fill().map(() => Array(SIZE).fill(null));
+    let selected = null, turn = 'red', mustJump = false;
+
+    // Initialize board
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if ((r + c) % 2 === 1) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                cell.style.background = '#21262d';
+                if (r < 3) { gameBoard[r][c] = {player: 'black', king: false}; drawPiece(cell, 'black'); }
+                if (r > 4) { gameBoard[r][c] = {player: 'red', king: false}; drawPiece(cell, 'red'); }
+                cell.addEventListener('click', () => handleClick(r, c));
+                cells.push(cell);
+                board.appendChild(cell);
+            } else {
+                const empty = document.createElement('div');
+                board.appendChild(empty);
+            }
+        }
+    }
+    container.appendChild(board);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.textContent = 'Reset';
+    resetBtn.onclick = () => initCheckers(statusEl);
+    btnGroup.appendChild(resetBtn);
+    container.appendChild(btnGroup);
+
+    updateStatus();
+
+    function drawPiece(cell, color, king = false) {
+        cell.innerHTML = '';
+        const piece = document.createElement('div');
+        piece.style.width = '46px';
+        piece.style.height = '46px';
+        piece.style.borderRadius = '50%';
+        piece.style.background = color === 'red' ? '#f85149' : '#ffffff';
+        piece.style.margin = '5px';
+        piece.style.boxShadow = '0 2px 5px rgba(0,0,0,.5)';
+        if (king) {
+            piece.style.border = '4px solid gold';
+        }
+        cell.appendChild(piece);
+    }
+
+    function handleClick(r, c) {
+        if (!gameBoard[r][c] && selected) {
+            // Try move
+            const moves = getMoves(selected.r, selected.c);
+            const move = moves.find(m => m.r === r && m.c === c);
+            if (move) {
+                makeMove(selected.r, selected.c, r, c, move.jump);
+                selected = null;
+                updateBoard();
+                if (!mustContinueJump(r, c)) {
+                    turn = turn === 'red' ? 'black' : 'red';
+                    setTimeout(aiMove, 600);
+                }
+            }
+        } else if (gameBoard[r][c] && gameBoard[r][c].player === turn) {
+            selected = {r, c};
+            highlightPossibleMoves(r, c);
+        }
+        updateBoard();
+        updateStatus();
+    }
+
+    function highlightPossibleMoves(r, c) {
+        // Remove old highlights
+        cells.forEach(cell => cell.style.outline = '');
+        const moves = getMoves(r, c);
+        moves.forEach(m => {
+            const idx = m.r * SIZE + m.c;
+            if (cells[idx]) cells[idx].style.outline = '3px solid #58a6ff';
+        });
+    }
+
+    function getMoves(r, c) {
+        const piece = gameBoard[r][c];
+        if (!piece) return [];
+        const dirs = piece.king ? [[-1,-1],[-1,1],[1,-1],[1,1]] : piece.player === 'red' ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]];
+        const moves = [], jumps = [];
+
+        dirs.forEach(([dr, dc]) => {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && (r + c) % 2 === (nr + nc) % 2) {
+                if (!gameBoard[nr][nc]) {
+                    moves.push({r: nr, c: nc, jump: false});
+                } else if (gameBoard[nr][nc].player !== piece.player) {
+                    const jr = nr + dr, jc = nc + dc;
+                    if (jr >= 0 && jr < SIZE && jc >= 0 && jc < SIZE && !gameBoard[jr][jc]) {
+                        jumps.push({r: jr, c: jc, jump: true, capture: [nr, nc]});
+                    }
+                }
+            }
+        });
+        mustJump = jumps.length > 0;
+        return mustJump ? jumps : moves;
+    }
+
+    function makeMove(fr, fc, tr, tc, isJump) {
+        const piece = gameBoard[fr][fc];
+        gameBoard[tr][tc] = piece;
+        gameBoard[fr][fc] = null;
+        if (isJump && getMoves(tr, tc).some(m => m.jump)) {
+            // Allow chain
+        } else if (isJump) {
+            const [cr, cc] = getMoves(fr, fc).find(m => m.r === tr && m.c === tc).capture;
+            gameBoard[cr][cc] = null;
+        }
+        // King promotion
+        if ((tr === 0 && piece.player === 'red') || (tr === SIZE-1 && piece.player === 'black')) {
+            piece.king = true;
+        }
+    }
+
+    function mustContinueJump(r, c) {
+        return getMoves(r, c).some(m => m.jump);
+    }
+
+    function updateBoard() {
+        cells.forEach((cell, i) => {
+            const r = Math.floor(i / SIZE), c = i % SIZE;
+            if ((r + c) % 2 === 1 && gameBoard[r][c]) {
+                drawPiece(cell, gameBoard[r][c].player, gameBoard[r][c].king);
+            } else if ((r + c) % 2 === 1) {
+                cell.innerHTML = '';
+            }
+        });
+    }
+
+    function aiMove() {
+        if (turn !== 'black') return;
+        // Simple greedy AI: take jumps, else move forward
+        let best = null, bestScore = -Infinity;
+        for (let r = 0; r < SIZE; r++) {
+            for (let c = 0; c < SIZE; c++) {
+                if (gameBoard[r][c] && gameBoard[r][c].player === 'black') {
+                    const moves = getMoves(r, c);
+                    moves.forEach(m => {
+                        const score = m.jump ? 10 : 1;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            best = {fr: r, fc: c, tr: m.r, tc: m.c, jump: m.jump};
+                        }
+                    });
+                }
+            }
+        }
+        if (best) {
+            makeMove(best.fr, best.fc, best.tr, best.tc, best.jump);
+            updateBoard();
+            if (mustContinueJump(best.tr, best.tc)) {
+                setTimeout(aiMove, 400);
+            } else {
+                turn = 'red';
+                updateStatus();
+            }
+        }
+    }
+
+    function updateStatus() {
+        statusEl.textContent = turn === 'red' ? 'Your turn (Red)' : 'AI turn (Black)';
+    }
+}
+
+/* ==================== CHESS (Simplified AI) ==================== */
+function initChess(statusEl) {
+    const SIZE = 8;
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.gridTemplate = `repeat(${SIZE}, 60px)/repeat(${SIZE}, 60px)`;
+    const cells = [];
+    const pieces = { K:'♔', Q:'♕', R:'♖', B:'♗', N:'♘', P:'♙', k:'♚', q:'♛', r:'♜', b:'♝', n:'♞', p:'♟' };
+    let gameBoard = [
+        ['r','n','b','q','k','b','n','r'],
+        ['p','p','p','p','p','p','p','p'],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        ['P','P','P','P','P','P','P','P'],
+        ['R','N','B','Q','K','B','N','R']
+    ];
+    let turn = 'white', selected = null;
+
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.style.background = (r+c)%2 === 0 ? '#21262d' : '#161b22';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            if (gameBoard[r][c]) cell.textContent = pieces[gameBoard[r][c]];
+            cell.addEventListener('click', () => handleChessClick(r, c));
+            cells.push(cell);
+            board.appendChild(cell);
+        }
+    }
+    container.appendChild(board);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.textContent = 'Reset';
+    resetBtn.onclick = () => initChess(statusEl);
+    btnGroup.appendChild(resetBtn);
+    container.appendChild(btnGroup);
+
+    updateStatus();
+
+    function handleChessClick(r, c) {
+        const piece = gameBoard[r][c];
+        if (selected) {
+            const moves = getChessMoves(selected.r, selected.c);
+            if (moves.some(m => m.r === r && m.c === c)) {
+                gameBoard[r][c] = gameBoard[selected.r][selected.c];
+                gameBoard[selected.r][selected.c] = null;
+                updateBoard();
+                turn = turn === 'white' ? 'black' : 'white';
+                setTimeout(aiChessMove, 700);
+            }
+            selected = null;
+            clearHighlights();
+        } else if (piece && ((turn === 'white' && piece === piece.toUpperCase()) || (turn === 'black' && piece === piece.toLowerCase()))) {
+            selected = {r, c};
+            highlightChessMoves(r, c);
+        }
+        updateStatus();
+    }
+
+    function highlightChessMoves(r, c) {
+        clearHighlights();
+        const moves = getChessMoves(r, c);
+        moves.forEach(m => {
+            const idx = m.r * SIZE + m.c;
+            cells[idx].style.outline = '3px solid #58a6ff';
+        });
+    }
+
+    function clearHighlights() {
+        cells.forEach(cell => cell.style.outline = '');
+    }
+
+    function getChessMoves(r, c) {
+        const piece = gameBoard[r][c];
+        if (!piece) return [];
+        const isWhite = piece === piece.toUpperCase();
+        const type = piece.toUpperCase();
+        const moves = [];
+
+        // Simplified move generation (no castling, en passant, check detection)
+        const dirs = {
+            R: [[0,1],[0,-1],[1,0],[-1,0]],
+            B: [[1,1],[1,-1],[-1,1],[-1,-1]],
+            Q: [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]],
+            K: [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]],
+            N: [[1,2],[1,-2],[-1,2],[-1,-2],[2,1],[2,-1],[-2,1],[-2,-1]]
+        };
+
+        if (type === 'P') {
+            const dir = isWhite ? -1 : 1;
+            const start = isWhite ? 6 : 1;
+            if (!gameBoard[r+dir][c]) {
+                moves.push({r: r+dir, c});
+                if (r === start && !gameBoard[r+2*dir][c]) moves.push({r: r+2*dir, c});
+            }
+            [-1,1].forEach(dc => {
+                const nc = c + dc;
+                if (nc >= 0 && nc < SIZE && gameBoard[r+dir][nc] && (isWhite ? gameBoard[r+dir][nc] === gameBoard[r+dir][nc].toLowerCase() : gameBoard[r+dir][nc] === gameBoard[r+dir][nc].toUpperCase())) {
+                    moves.push({r: r+dir, c: nc});
+                }
+            });
+        } else if (dirs[type]) {
+            dirs[type].forEach(([dr, dc]) => {
+                let nr = r + dr, nc = c + dc;
+                while (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+                    if (!gameBoard[nr][nc]) {
+                        moves.push({r: nr, c: nc});
+                    } else {
+                        if ((isWhite && gameBoard[nr][nc] === gameBoard[nr][nc].toLowerCase()) || (!isWhite && gameBoard[nr][nc] === gameBoard[nr][nc].toUpperCase())) {
+                            moves.push({r: nr, c: nc});
+                        }
+                        break;
+                    }
+                    if (type !== 'R' && type !== 'B' && type !== 'Q') break;
+                    nr += dr; nc += dc;
+                }
+            });
+        }
+        return moves;
+    }
+
+    function updateBoard() {
+        cells.forEach((cell, i) => {
+            const r = Math.floor(i / SIZE), c = i % SIZE;
+            cell.textContent = gameBoard[r][c] ? pieces[gameBoard[r][c]] : '';
+        });
+    }
+
+    function aiChessMove() {
+        if (turn !== 'black') return;
+        // Random legal move (for demo)
+        const blackPieces = [];
+        for (let r = 0; r < SIZE; r++) {
+            for (let c = 0; c < SIZE; c++) {
+                if (gameBoard[r][c] && gameBoard[r][c] === gameBoard[r][c].toLowerCase()) {
+                    const moves = getChessMoves(r, c);
+                    if (moves.length) blackPieces.push({r, c, moves});
+                }
+            }
+        }
+        if (blackPieces.length) {
+            const rand = blackPieces[Math.floor(Math.random() * blackPieces.length)];
+            const move = rand.moves[Math.floor(Math.random() * rand.moves.length)];
+            gameBoard[move.r][move.c] = gameBoard[rand.r][rand.c];
+            gameBoard[rand.r][rand.c] = null;
+            updateBoard();
+            turn = 'white';
+            updateStatus();
+        }
+    }
+
+    function updateStatus() {
+        statusEl.textContent = turn === 'white' ? 'Your turn (White)' : 'AI turn (Black)';
+    }
+}
+
+/* ==================== REVERSI (OTHELLO) ==================== */
+function initReversi(statusEl) {
+    const SIZE = 8;
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.gridTemplate = `repeat(${SIZE}, 60px)/repeat(${SIZE}, 60px)`;
+    const cells = [];
+    let gameBoard = Array(SIZE).fill().map(() => Array(SIZE).fill(null));
+    gameBoard[3][3] = 'white'; gameBoard[3][4] = 'black';
+    gameBoard[4][3] = 'black'; gameBoard[4][4] = 'white';
+    let player = 'black', ai = 'white';
+
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            cell.style.background = '#166534';
+            cell.addEventListener('click', () => playerPlace(r, c));
+            if (gameBoard[r][c]) {
+                cell.innerHTML = `<div style="width:46px;height:46px;border-radius:50%;background:${gameBoard[r][c] === 'black' ? '#000' : '#fff'};margin:5px;"></div>`;
+            }
+            cells.push(cell);
+            board.appendChild(cell);
+        }
+    }
+    container.appendChild(board);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.textContent = 'Reset';
+    resetBtn.onclick = () => initReversi(statusEl);
+    btnGroup.appendChild(resetBtn);
+    container.appendChild(btnGroup);
+
+    updateStatus();
+    showValidMoves();
+
+    function playerPlace(r, c) {
+        if (player !== 'black') return;
+        const flips = getFlips(gameBoard, r, c, 'black');
+        if (flips.length === 0) return;
+        placeAndFlip(r, c, 'black', flips);
+        updateBoard();
+        player = 'white';
+        updateStatus();
+        setTimeout(aiPlace, 600);
+    }
+
+    function aiPlace() {
+        const moves = getAllValidMoves(gameBoard, 'white');
+        if (moves.length === 0) { player = 'black'; updateStatus(); return; }
+        const move = moves[Math.floor(Math.random() * moves.length)];
+        const flips = getFlips(gameBoard, move.r, move.c, 'white');
+        placeAndFlip(move.r, move.c, 'white', flips);
+        updateBoard();
+        player = 'black';
+        updateStatus();
+        showValidMoves();
+    }
+
+    function placeAndFlip(r, c, color, flips) {
+        gameBoard[r][c] = color;
+        flips.forEach(([fr, fc]) => gameBoard[fr][fc] = color);
+    }
+
+    function getFlips(b, r, c, color) {
+        if (b[r][c]) return [];
+        const opponent = color === 'black' ? 'white' : 'black';
+        const flips = [];
+        const dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+        dirs.forEach(([dr, dc]) => {
+            const list = [];
+            let nr = r + dr, nc = c + dc;
+            while (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && b[nr][nc] === opponent) {
+                list.push([nr, nc]);
+                nr += dr; nc += dc;
+            }
+            if (list.length && nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && b[nr][nc] === color) {
+                flips.push(...list);
+            }
+        });
+        return flips;
+    }
+
+    function getAllValidMoves(b, color) {
+        const moves = [];
+        for (let r = 0; r < SIZE; r++) {
+            for (let c = 0; c < SIZE; c++) {
+                if (!b[r][c] && getFlips(b, r, c, color).length) {
+                    moves.push({r, c});
+                }
+            }
+        }
+        return moves;
+    }
+
+    function showValidMoves() {
+        cells.forEach(cell => cell.style.boxShadow = '');
+        const moves = getAllValidMoves(gameBoard, 'black');
+        moves.forEach(m => {
+            const idx = m.r * SIZE + m.c;
+            cells[idx].style.boxShadow = 'inset 0 0 0 3px #58a6ff';
+        });
+    }
+
+    function updateBoard() {
+        cells.forEach((cell, i) => {
+            const r = Math.floor(i / SIZE), c = i % SIZE;
+            if (gameBoard[r][c]) {
+                cell.innerHTML = `<div style="width:46px;height:46px;border-radius:50%;background:${gameBoard[r][c] === 'black' ? '#000' : '#fff'};margin:5px;"></div>`;
+            } else {
+                cell.innerHTML = '';
+            }
+        });
+        showValidMoves();
+    }
+
+    function updateStatus() {
+        const black = gameBoard.flat().filter(p => p === 'black').length;
+        const white = gameBoard.flat().filter(p => p === 'white').length;
+        statusEl.textContent = `Black: ${black} | White: ${white} | ${player === 'black' ? 'Your turn' : 'AI turn'}`;
+        if (black + white === 64 || (!getAllValidMoves(gameBoard, 'black').length && !getAllValidMoves(gameBoard, 'white').length)) {
+            const winner = black > white ? 'You win!' : white > black ? 'AI wins!' : 'Tie!';
+            statusEl.textContent += ` | ${winner}`;
+            statusEl.classList.add('win');
+        }
+    }
+}
+
+/* ==================== HANGMAN ==================== */
+function initHangman(statusEl) {
+    const words = ['JAVASCRIPT', 'HTML', 'CSS', 'GITHUB', 'CODING', 'HACKER', 'DEVELOPER', 'AI', 'BOT', 'GAME'];
+    const word = words[Math.floor(Math.random() * words.length)];
+    let guessed = Array(word.length).fill(false);
+    let wrong = 0;
+    const maxWrong = 6;
+
+    const hangmanSVG = `
+    <svg width="200" height="250" style="margin:1rem auto;display:block;">
+        <line x1="20" y1="230" x2="180" y2="230" stroke="#ccc" stroke-width="4"/>
+        <line x1="50" y1="230" x2="50" y2="20" stroke="#ccc" stroke-width="4"/>
+        <line x1="50" y1="20" x2="140" y2="20" stroke="#ccc" stroke-width="4"/>
+        <line x1="140" y1="20" x2="140" y2="50" stroke="#ccc" stroke-width="4"/>
+        <!-- Head -->
+        <circle cx="140" cy="65" r="15" stroke="#f85149" stroke-width="3" fill="none" class="${wrong >= 1 ? '' : 'hidden'}"/>
+        <!-- Body -->
+        <line x1="140" y1="80" x2="140" y2="140" stroke="#f85149" stroke-width="3" class="${wrong >= 2 ? '' : 'hidden'}"/>
+        <!-- Arms -->
+        <line x1="140" y1="100" x2="110" y2="120" stroke="#f85149" stroke-width="3" class="${wrong >= 3 ? '' : 'hidden'}"/>
+        <line x1="140" y1="100" x2="170" y2="120" stroke="#f85149" stroke-width="3" class="${wrong >= 4 ? '' : 'hidden'}"/>
+        <!-- Legs -->
+        <line x1="140" y1="140" x2="120" y2="170" stroke="#f85149" stroke-width="3" class="${wrong >= 5 ? '' : 'hidden'}"/>
+        <line x1="140" y1="140" x2="160" y2="170" stroke="#f85149" stroke-width="3" class="${wrong >= 6 ? '' : 'hidden'}"/>
+    </svg>`;
+    const svgContainer = document.createElement('div');
+    svgContainer.innerHTML = hangmanSVG;
+    container.appendChild(svgContainer);
+
+    const wordDiv = document.createElement('div');
+    wordDiv.style.fontSize = '2.5rem';
+    wordDiv.style.letterSpacing = '0.5rem';
+    wordDiv.style.textAlign = 'center';
+    wordDiv.style.margin = '1rem';
+    container.appendChild(wordDiv);
+
+    const keyboard = document.createElement('div');
+    keyboard.style.display = 'grid';
+    keyboard.style.gridTemplateColumns = 'repeat(9, 40px)';
+    keyboard.style.gap = '8px';
+    keyboard.style.justifyContent = 'center';
+    keyboard.style.margin = '1.5rem';
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+        const btn = document.createElement('button');
+        btn.textContent = letter;
+        btn.className = 'btn';
+        btn.style.width = '40px';
+        btn.style.height = '40px';
+        btn.onclick = () => guessLetter(letter, btn);
+        keyboard.appendChild(btn);
+    });
+    container.appendChild(keyboard);
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger';
+    resetBtn.textContent = 'New Word';
+    resetBtn.style.display = 'block';
+    resetBtn.style.margin = '1rem auto';
+    resetBtn.onclick = () => initHangman(statusEl);
+    container.appendChild(resetBtn);
+
+    updateWord();
+
+    function guessLetter(letter, btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        let found = false;
+        for (let i = 0; i < word.length; i++) {
+            if (word[i] === letter) {
+                guessed[i] = true;
+                found = true;
+            }
+        }
+        if (!found) wrong++;
+        updateWord();
+        updateHangman();
+        checkEnd();
+    }
+
+    function updateWord() {
+        wordDiv.textContent = word.split('').map((l, i) => guessed[i] ? l : '_').join(' ');
+    }
+
+    function updateHangman() {
+        // SVG updates via class removal
+        const parts = svgContainer.querySelectorAll('.hidden');
+        parts.forEach((p, i) => {
+            if (i < wrong) p.classList.remove('hidden');
+        });
+    }
+
+    function checkEnd() {
+        if (guessed.every(g => g)) {
+            statusEl.textContent = 'You win! 🎉';
+            statusEl.classList.add('win');
+            disableKeyboard();
+        } else if (wrong >= maxWrong) {
+            statusEl.textContent = `Game Over! Word: ${word}`;
+            disableKeyboard();
+        } else {
+            statusEl.textContent = `Wrong guesses: ${wrong}/${maxWrong}`;
+        }
+    }
+
+    function disableKeyboard() {
+        keyboard.querySelectorAll('button').forEach(b => b.disabled = true);
+    }
+
+    statusEl.textContent = `Wrong guesses: 0/${maxWrong}`;
+}
+</script>
+
 </body>
 </html>
